@@ -119,17 +119,11 @@ git clone https://github.com/WilsonAImaster/taiwanese-english-checker ~/.claude/
 
 ## 關於作者
 
-Wilson，英文教學16年，淡江英文系、交大傳播碩士，TOEIC金色證書、經濟部iPAS AI應用規劃師。教過北一女、建中的高中生，也教上班族、創業者和貿易從業者。目前經營Wilson AI Lab，研究怎麼用AI讓英文真的派上用場。
+Wilson，英文老師，教學16年，研究怎麼用AI讓英文真的派上用場。
 
-這些規則挑的是英文不錯的人也常寫、最容易造成誤會的句子。發現規則有誤，或遇過其他台式英文，歡迎開issue告訴我。想系統化地練商務英文和AI協作，歡迎看看下面的課程和社群。
+這些規則挑的是英文不錯的人也常寫、最容易造成誤會的句子。發現規則有誤，或遇過其他台式英文，歡迎[開issue](https://github.com/WilsonAImaster/taiwanese-english-checker/issues)告訴我。
 
-## 想要更多AI工具實測？
-
-- 🌐 課程與諮詢｜[wilsonaienglish.com](https://wilsonaienglish.com/)
-- ▶️ YouTube｜[Wilson 威爾森實驗室](https://www.youtube.com/@WilsonAILab)
-- 👥 Skool｜[Wilson AI Lab](https://www.skool.com/wilson-9076)
-- 📸 Instagram｜[@wilsonailab](https://www.instagram.com/wilsonailab/)
-- 🧵 Threads｜[@wilsonailab](https://www.threads.com/@wilsonailab)
+想要更多AI工具實測？[網站](https://wilsonaienglish.com/)・[YouTube](https://www.youtube.com/@WilsonAILab)・[Skool](https://www.skool.com/wilson-9076)・[Instagram](https://www.instagram.com/wilsonailab/)・[Threads](https://www.threads.com/@wilsonailab)
 
 ## 授權
 
