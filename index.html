@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台式英文抓蟲器｜Taiwanese English Checker</title>
+<meta name="description" content="貼上你的英文Email，AI用英文老師的方式抓出台式英文：外國人讀起來哪裡怪、為什麼，再給你自然的改法。30條規則，免費開源。">
+<meta property="og:title" content="台式英文抓蟲器｜Taiwanese English Checker">
+<meta property="og:description" content="文法都對，外國客戶讀起來還是怪？30條台式英文地雷，讓AI像英文老師一樣幫你抓。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050505; --glass: rgba(255,255,255,.04); --glass-hover: rgba(255,255,255,.07);
+    --line: rgba(255,255,255,.09); --line-strong: rgba(255,255,255,.15);
+    --ink: #f3f4f6; --muted: #cbd5e1; --dim: #94a3b8;
+    --accent: #76B900; --accent-soft: rgba(118,185,0,.1); --accent-line: rgba(118,185,0,.4);
+    --amber: #fde68a;
+    --sev-error: #d03b3b; --sev-risk: #ec835a; --sev-odd: #f2d14b;
+    --radius: 24px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: var(--ink); font-family: Inter, "Noto Sans TC", system-ui, sans-serif; font-weight: 400; line-height: 1.75;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle at 50% -10%, rgba(118,185,0,.12), transparent 672px),
+                      radial-gradient(circle at 12% 22%, rgba(255,255,255,.04), transparent 520px);
+    background-repeat: no-repeat;
+  }
+  #net { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .55; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-weight: 900; line-height: 1.25; margin: 0; }
+  h2 { font-size: clamp(28px, 4vw, 44px); letter-spacing: .02em; }
+  .gradient-text { background: linear-gradient(90deg, #fff 0%, #d8ffc2 48%, #76b900 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .eyebrow { color: var(--amber); font-weight: 900; letter-spacing: .35em; font-size: 12px; text-transform: uppercase; }
+  .pill { display: inline-flex; border: 1px solid var(--accent-line); background: rgba(0,0,0,.5); color: var(--accent); border-radius: 999px; padding: 6px 16px; font-size: 12px; font-weight: 900; letter-spacing: .32em; text-transform: uppercase; }
+  .muted { color: var(--muted); }
+  section { padding: 96px 0; }
+  section.alt { background: rgba(255,255,255,.015); border-top: 1px solid rgba(255,255,255,.04); border-bottom: 1px solid rgba(255,255,255,.04); }
+  .section-head { max-width: 760px; margin-bottom: 44px; }
+  .section-head h2 { margin-top: 14px; }
+  .section-head p { color: var(--muted); font-weight: 300; font-size: 18px; margin: 14px 0 0; }
+  .glass { background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius); backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); box-shadow: 0 36px 90px rgba(0,0,0,.38); }
+
+  nav { position: sticky; top: 0; z-index: 10; background: rgba(5,5,5,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .brand { font-weight: 900; color: #fff; text-decoration: none; font-size: 18px; }
+  .brand span { color: var(--accent); }
+  .nav-links { display: flex; gap: 26px; align-items: center; font-size: 14px; font-weight: 600; }
+  .nav-links a { color: var(--muted); text-decoration: none; }
+  .nav-links a:hover { color: #fff; }
+  @media (max-width: 760px) { .nav-links a:not(.btn) { display: none; } }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 15px 30px; border-radius: 16px; font-weight: 900; letter-spacing: .14em; text-decoration: none; border: 0; cursor: pointer; font-family: inherit; font-size: 14px; transition: transform .15s, box-shadow .15s, background .15s; }
+  .btn-primary { background: var(--accent); color: #050505; box-shadow: 0 0 24px rgba(118,185,0,.42); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 34px rgba(118,185,0,.6); }
+  .btn-ghost { background: rgba(255,255,255,.05); color: #fff; border: 1px solid var(--line-strong); }
+  .btn-ghost:hover { background: rgba(255,255,255,.09); }
+  .btn-sm { padding: 10px 18px; font-size: 12px; border-radius: 999px; }
+  nav .btn { padding: 10px 20px; font-size: 12px; border-radius: 999px; }
+
+  .hero { padding: 104px 0 80px; text-align: center; }
+  .hero h1 { font-size: clamp(42px, 7vw, 84px); margin-top: 26px; line-height: 1.1; }
+  .hero .lead { font-size: clamp(18px, 2.2vw, 23px); font-weight: 300; color: var(--muted); max-width: 780px; margin: 26px auto 36px; }
+  .hero .lead b { color: #fff; font-weight: 700; }
+  .hero .ctas { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 72px; text-align: left; }
+  @media (max-width: 760px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { padding: 24px; }
+  .stat b { display: block; font-size: 44px; font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 14px; }
+
+  .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 860px) { .cards3 { grid-template-columns: 1fr; } }
+  .pcard { padding: 28px; transition: background .2s, border-color .2s; }
+  .pcard:hover { background: var(--glass-hover); border-color: rgba(118,185,0,.25); }
+  .pcard code { font-family: inherit; font-size: 19px; font-weight: 800; display: block; margin-bottom: 12px; color: #fff; }
+  .pcard .who { color: var(--accent); font-weight: 800; font-size: 13px; letter-spacing: .08em; }
+  .pcard p { color: var(--muted); }
+
+  .sev { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; padding: 3px 11px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid var(--line); color: #fff; white-space: nowrap; }
+
+  .chart-card { padding: 30px; }
+  .chart-title { font-weight: 800; font-size: 18px; color: #fff; }
+  .chart-sub { color: var(--dim); font-size: 14px; margin-top: 2px; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 18px 0 22px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .bars { display: grid; gap: 16px; }
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 36px; gap: 14px; align-items: center; }
+  @media (max-width: 600px) { .bar-row { grid-template-columns: 96px 1fr 28px; } }
+  .bar-label { font-weight: 700; font-size: 15px; }
+  .bar-track { display: flex; gap: 2px; height: 30px; }
+  .seg { height: 100%; display: flex; align-items: center; justify-content: center; color: #050505; font-weight: 800; font-size: 13px; cursor: default; outline: none; }
+  .seg:last-child { border-radius: 0 4px 4px 0; }
+  .seg:hover, .seg:focus-visible { filter: brightness(1.12); box-shadow: 0 0 0 2px #fff inset; }
+  .bar-total { color: var(--muted); font-size: 14px; text-align: right; font-variant-numeric: tabular-nums; }
+  .axis-note { color: var(--dim); font-size: 12px; margin-top: 14px; }
+  .insight { margin-top: 22px; padding: 16px 18px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 14px 14px 0; }
+  details.tbl { margin-top: 16px; font-size: 14px; }
+  details.tbl summary { cursor: pointer; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 700; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  #tooltip { position: fixed; pointer-events: none; z-index: 50; background: rgba(10,10,10,.96); border: 1px solid var(--line-strong); border-radius: 12px; padding: 10px 12px; font-size: 13px; max-width: 280px; opacity: 0; transition: opacity .12s; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  #tooltip.show { opacity: 1; }
+  #tooltip b { display: block; margin-bottom: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1.05fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .chip { background: rgba(255,255,255,.04); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 7px 15px; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+  .chip:hover { color: #fff; }
+  .chip[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); border-color: rgba(118,185,0,.28); }
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .rules { grid-template-columns: 1fr; } }
+  .rule { padding: 22px 24px; }
+  .rule-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 8px; }
+  .rule-head h3 { font-size: 17px; }
+  .rule-head small { color: var(--accent); font-weight: 900; margin-right: 8px; }
+  .rule p { margin: 4px 0; font-size: 15px; }
+  .rule .why { color: var(--muted); margin-top: 8px; }
+  .more { text-align: center; margin-top: 28px; }
+
+  .mail { background: rgba(0,0,0,.45); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 26px; font-size: 16px; line-height: 2; }
+  .mail .lbl { font-size: 12px; color: var(--amber); font-weight: 900; letter-spacing: .3em; margin-bottom: 8px; }
+  mark { background: transparent; color: #fff; border-bottom: 3px solid; padding: 0 1px; cursor: help; outline: none; }
+  mark sup { font-size: 11px; font-weight: 700; margin-left: 2px; color: var(--dim); }
+  .after { margin-top: 18px; }
+  .after .ins { color: var(--accent); font-weight: 700; }
+  .issues { display: grid; gap: 10px; margin-top: 18px; }
+  .issue { display: grid; grid-template-columns: 26px 1fr; gap: 10px; background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font-size: 14px; }
+  .issue .n { color: var(--accent); font-weight: 900; }
+  .issue s { color: var(--dim); }
+
+  .try { padding: 30px; }
+  textarea, select { width: 100%; background: rgba(0,0,0,.45); color: #fff; border: 1px solid var(--line-strong); border-radius: 14px; padding: 14px; font-family: inherit; font-size: 15px; }
+  select option { background: #111; }
+  textarea { min-height: 180px; resize: vertical; }
+  textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+  .row select { width: auto; min-width: 220px; }
+  .open-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .note { font-size: 13px; color: var(--dim); margin-top: 14px; }
+  .status { font-size: 14px; color: var(--accent); font-weight: 800; min-height: 1.5em; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+  .step { padding: 26px; min-width: 0; }
+  .step b { font-size: 30px; font-weight: 900; }
+  .step h3 { margin: 6px 0 4px; }
+  pre { white-space: pre-wrap; word-break: break-all; background: rgba(0,0,0,.5); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font-size: 13px; margin: 10px 0 0; color: #d8ffc2; }
+
+  footer { padding: 72px 0 52px; border-top: 1px solid var(--line); }
+  .socials { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+  .socials a { background: rgba(255,255,255,.04); border: 1px solid var(--line); color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 800; }
+  .socials a:hover { color: var(--accent); border-color: rgba(118,185,0,.28); }
+  .socials a.line { background: var(--accent); color: #050505; border-color: var(--accent); box-shadow: 0 0 24px rgba(118,185,0,.35); }
+  .scen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  @media (max-width: 900px) { .scen-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .scen-grid { grid-template-columns: 1fr; } }
+  .scen { padding: 22px 24px; }
+  .scen-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .scen h3 { font-size: 18px; }
+  .code { color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(118,185,0,.28); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 900; white-space: nowrap; }
+  .scen .use { color: var(--dim); font-size: 13px; margin: 6px 0 10px; }
+  .scen ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+  .scen li { margin: 3px 0; }
+  @media (prefers-reduced-motion: reduce) { #net { display: none; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="https://wilsonaienglish.com/">Wilson <span>AI</span> 英語領航者</a>
+    <div class="nav-links">
+      <a href="#rules">規則全貌</a>
+      <a href="#scenarios">情境包</a>
+      <a href="#example">實際範例</a>
+      <a href="#try">免費試用</a>
+      <a href="#install">安裝</a>
+      <a class="btn btn-ghost" href="https://github.com/WilsonAImaster/taiwanese-english-checker">★ GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="pill">Taiwanese English Checker · Open Source</div>
+    <h1>文法都對，<br>外國客戶讀起來<span class="gradient-text" style="white-space:nowrap">還是怪</span>？</h1>
+    <p class="lead">台式英文抓蟲器：貼上你的英文Email，AI照16年英文老師整理的規則，告訴你<b>哪裡怪、為什麼</b>，再給你自然的改法。改一次，學一次。</p>
+    <div class="ctas">
+      <a class="btn btn-primary" href="#try">立即免費試用</a>
+      <a class="btn btn-ghost" href="https://github.com/WilsonAImaster/taiwanese-english-checker">★ 在GitHub給顆星</a>
+    </div>
+    <div class="stats" aria-label="規則統計">
+      <div class="stat glass"><b class="gradient-text" data-stat="total">30</b><span>條台式英文地雷</span></div>
+      <div class="stat glass"><b class="gradient-text" data-stat="cats">4</b><span>大類：語氣、直翻、文法、商務習慣</span></div>
+      <div class="stat glass"><b class="gradient-text" data-stat="nonError">16</b><span>條不是「文法錯」，而是語氣與習慣</span></div>
+      <div class="stat glass"><b class="gradient-text" data-stat="scen">7</b><span>個情境包：求職、職場、簡報、電商、學術、社群、旅遊</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Why</div>
+      <h2>外國人不會告訴你，你的英文哪裡怪</h2>
+      <p>但它會影響對方對你的印象，甚至讓訂單出錯。三個真實常見的例子：</p>
+    </div>
+    <div class="cards3">
+      <div class="pcard glass">
+        <code>Please revert to me.</code>
+        <div class="who">美國客戶讀到的是</div>
+        <p>「請恢復成我？」revert當「回覆」是亞洲商務用法，歐美讀者可能看不懂你要他做什麼。</p>
+        <span class="sev">🟠 誤會</span>
+      </div>
+      <div class="pcard glass">
+        <code>The goods will ship on 03/04.</code>
+        <div class="who">歐洲客戶讀到的是</div>
+        <p>4月3日出貨。美國寫法是月/日，英國和歐洲多半是日/月，一不小心就差一個月。</p>
+        <span class="sev">🟠 誤會</span>
+      </div>
+      <div class="pcard glass">
+        <code>Look forward to hear from you.</code>
+        <div class="who">幾乎每封台式英文信都有</div>
+        <p>look forward to的to是介系詞，後面要接-ing：I look forward to hearing from you。很多人寫了十年都沒發現。</p>
+        <span class="sev">🔴 錯誤</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">The 30 Rules</div>
+      <h2>30條規則全貌</h2>
+      <p>每條規則都分成三種嚴重程度。AI檢查時會標出等級，讓你先改最會出事的地方。</p>
+    </div>
+
+    <div class="chart-card glass">
+      <div class="chart-title">各類別的規則數，依嚴重程度</div>
+      <div class="chart-sub">滑過色塊看說明</div>
+      <div class="legend" id="legend"></div>
+      <div class="bars" id="bars" role="img" aria-label="各類別規則數長條圖"></div>
+      <div class="axis-note">長條長度＝該類別的規則數</div>
+      <div class="insight" id="insight"></div>
+      <details class="tbl">
+        <summary>以表格檢視</summary>
+        <table id="table"></table>
+      </details>
+    </div>
+
+    <div style="margin-top:56px">
+      <div class="filters" id="filters" role="group" aria-label="篩選規則"></div>
+      <div class="rules" id="ruleList"></div>
+      <div class="more"><button class="btn btn-ghost btn-sm" id="moreBtn" type="button">顯示全部規則</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="scenarios">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Scenario Packs</div>
+      <h2>不只外國客戶：7個情境包</h2>
+      <p>告訴AI這是什麼文件，或讓它自己判斷。它會在30條通用規則之外，再套用該情境專屬的規則。</p>
+    </div>
+    <div class="chart-card glass">
+      <div class="chart-title">各情境的專屬規則數，依嚴重程度</div>
+      <div class="chart-sub">滑過色塊看是哪幾條</div>
+      <div class="legend" id="legend3"></div>
+      <div class="bars" id="scenBars" role="img" aria-label="各情境規則數長條圖"></div>
+      <div class="axis-note">長條長度＝該情境的專屬規則數；通用的30條規則在每個情境都會一起使用</div>
+    </div>
+    <div class="scen-grid" id="scenCards"></div>
+  </div>
+</section>
+
+<section id="example">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Real Example</div>
+      <h2>實際診斷：一封寫給德國客戶的信</h2>
+      <p>這是真的用這個skill跑出來的結果。滑過有底線的地方，看AI怎麼說。</p>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="mail">
+          <div class="lbl">修改前</div>
+          <div id="mailBefore"></div>
+        </div>
+        <div class="mail after">
+          <div class="lbl">修改後</div>
+          <div>
+            <span class="ins">Dear Mr. Weber,</span><br>
+            <span class="ins">This is</span> Wilson from ABC Company. We <span class="ins">sent</span> the samples last Friday. <span class="ins">Please note</span> that the tracking number is <span class="ins">below</span>.<br>
+            Our prices are <span class="ins">competitive</span>, and <span class="ins">many customers like</span> this model.<br>
+            The goods will ship on <span class="ins">March 4</span>, and the price is <span class="ins">USD 12</span> per unit. <span class="ins">Could you please</span> confirm the order and <span class="ins">get back to me by Friday, February 27</span>?<br>
+            Thank you for choosing us. <span class="ins">Feel free to</span> contact us if you have any questions.<br>
+            <span class="ins">I look forward to hearing from you.</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="chart-card glass">
+          <div class="chart-title">這封信的診斷結果</div>
+          <div class="chart-sub">找到13個問題，每一句都是「以為是對的」；寫對的句子（Thank you for choosing us.）沒有被改</div>
+          <div class="legend" id="legend2"></div>
+          <div class="bars" id="diagBar" role="img" aria-label="這封信的問題分布"></div>
+          <div class="issues" id="issues"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">How It Works</div>
+      <h2>不只幫你改，還告訴你為什麼</h2>
+      <p>一般AI改寫只給你答案，下次你還是會寫錯。這個skill讓AI照英文老師的批改方式輸出：</p>
+    </div>
+    <div class="steps">
+      <div class="step glass"><b>01</b><h3>分級＋原因</h3><p class="muted">每個問題標出錯誤、誤會或不自然，用一句話講「外國人讀起來的感覺」，並標出規則編號。</p></div>
+      <div class="step glass"><b>02</b><h3>改寫全文</h3><p class="muted">保留你的意思、長度和語氣，只改有問題的地方。寫對的句子不會被亂改。</p></div>
+      <div class="step glass"><b>03</b><h3>一個習慣</h3><p class="muted">最後挑出「最值得記住的一點」。一次改掉一個壞習慣，比一次背30條有效。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="try">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Try It Free</div>
+      <h2>免費試用：不用安裝、不用註冊</h2>
+      <p>貼上你的英文、選好情境，按下按鈕，就會把規則和你的英文包成一段提示詞。貼進你自己的ChatGPT、Claude或Gemini就能用。</p>
+    </div>
+    <div class="try glass">
+      <label for="userText" class="chart-title">你的英文（Email、訊息、簡報文字都可以）</label>
+      <textarea id="userText" style="margin-top:10px" placeholder="例如：Dear Mr. Thomas, Here is Wilson from ABC Company. Please be noted that the price is as below. Look forward to hear from you."></textarea>
+      <div class="row">
+        <label for="scenario" class="muted" style="font-size:14px">這是什麼？</label>
+        <select id="scenario">
+          <option value="auto">讓AI自己判斷</option>
+          <option value="none">通用／寫給客戶的商務信</option>
+          <option value="job">求職：履歷、求職信、面試</option>
+          <option value="workplace">外商職場：同事、主管、Teams</option>
+          <option value="presentation">簡報與會議發言</option>
+          <option value="ecommerce">跨境電商與客服</option>
+          <option value="academic">學術與升學</option>
+          <option value="social">社群與個人品牌</option>
+          <option value="travel">旅遊與生活</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="country" class="muted" style="font-size:14px">收件人是哪國人？</label>
+        <select id="country">
+          <option value="">不指定</option>
+          <option>美國</option>
+          <option>拉丁美洲</option>
+          <option>歐洲</option>
+          <option>日本</option>
+          <option>東南亞</option>
+          <option>其他母語者</option>
+        </select>
+        <button class="btn btn-primary" id="copyBtn" type="button">複製提示詞</button>
+      </div>
+      <div class="status" id="copyStatus" role="status" aria-live="polite"></div>
+      <div class="open-links">
+        <a class="btn btn-ghost btn-sm" href="https://chatgpt.com/" target="_blank" rel="noopener">開啟 ChatGPT</a>
+        <a class="btn btn-ghost btn-sm" href="https://claude.ai/new" target="_blank" rel="noopener">開啟 Claude</a>
+        <a class="btn btn-ghost btn-sm" href="https://gemini.google.com/app" target="_blank" rel="noopener">開啟 Gemini</a>
+      </div>
+      <p class="note">你的文字只在你的瀏覽器裡組成提示詞，這個頁面不會上傳或儲存任何內容。AI也可能出錯，重要的信改完請自己再讀一遍。</p>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Install</div>
+      <h2>天天用的話，裝成skill更方便</h2>
+      <p>裝好之後，直接說「幫我檢查這封信有沒有台式英文」再貼上內容就好。</p>
+    </div>
+    <div class="steps">
+      <div class="step glass"><h3>Claude Code</h3><p class="muted">一行指令安裝：</p><pre>git clone https://github.com/WilsonAImaster/taiwanese-english-checker ~/.claude/skills/taiwanese-english-checker</pre></div>
+      <div class="step glass"><h3>其他AI agent</h3><p class="muted">支援SKILL.md格式的工具，把整個資料夾放進它的skills資料夾即可。</p></div>
+      <div class="step glass"><h3>網頁版AI</h3><p class="muted">把SKILL.md和references/rules.md貼進ChatGPT、Claude或Gemini的「專案」或「自訂指令」。</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="eyebrow">About</div>
+    <h2 style="margin-top:8px">Wilson｜英文教學16年 × AI應用</h2>
+    <p class="muted" style="max-width:760px">淡江英文系、交大傳播碩士，TOEIC金色證書、經濟部iPAS AI應用規劃師。教過高中生、上班族、創業者和貿易從業者，現在經營Wilson AI Lab，研究怎麼用AI讓英文真的派上用場。</p>
+    <h3 style="margin-top:36px">想要更多AI工具實測？</h3>
+    <div class="socials">
+      <a class="line" href="https://line.me/ti/p/~wilsoncode">加入 Wilson LINE 諮詢</a>
+      <a href="https://wilsonaienglish.com/">🌐 課程與諮詢</a>
+      <a href="https://www.youtube.com/@WilsonAILab">▶️ YouTube｜Wilson 威爾森實驗室</a>
+      <a href="https://www.skool.com/wilson-9076">👥 Skool｜Wilson AI Lab</a>
+      <a href="https://www.instagram.com/wilsonailab/">📸 Instagram｜@wilsonailab</a>
+      <a href="https://www.threads.com/@wilsonailab">🧵 Threads｜@wilsonailab</a>
+    </div>
+    <p class="muted" style="font-size:13px;margin-top:40px">MIT授權・開源於 <a href="https://github.com/WilsonAImaster/taiwanese-english-checker">GitHub</a>・歡迎使用、修改、分享，請保留出處。</p>
+  </div>
+</footer>
+
+<canvas id="net" aria-hidden="true"></canvas>
+<div id="tooltip" role="tooltip"></div>
+
+<script>
+const SEV = {
+  "🔴": { key: "error", name: "錯誤", desc: "文法或用字錯", color: "var(--sev-error)" },
+  "🟠": { key: "risk",  name: "誤會", desc: "可能冒犯對方，或意思被誤解", color: "var(--sev-risk)" },
+  "🟡": { key: "odd",   name: "不自然", desc: "看得懂，但母語者不會這樣寫", color: "var(--sev-odd)" },
+};
+const SEV_ORDER = ["🔴", "🟠", "🟡"];
+let RULES_MD = "", SKILL_MD = "";
+const SCENARIOS = [
+  { key: "job", code: "J", name: "求職" },
+  { key: "workplace", code: "W", name: "外商職場" },
+  { key: "presentation", code: "P", name: "簡報與會議發言" },
+  { key: "ecommerce", code: "E", name: "跨境電商與客服" },
+  { key: "academic", code: "A", name: "學術與升學" },
+  { key: "social", code: "S", name: "社群與個人品牌" },
+  { key: "travel", code: "T", name: "旅遊與生活" },
+];
+const SCEN_MD = {};
+const NL = String.fromCharCode(10);
+
+// ---------- tooltip ----------
+const tip = document.getElementById("tooltip");
+function bindTip(el, html) {
+  const show = e => {
+    tip.innerHTML = html; tip.classList.add("show");
+    const r = el.getBoundingClientRect();
+    const x = e && e.clientX ? e.clientX : r.left + r.width / 2;
+    const y = e && e.clientY ? e.clientY : r.top;
+    const w = tip.offsetWidth;
+    tip.style.left = Math.min(Math.max(8, x - w / 2), innerWidth - w - 8) + "px";
+    tip.style.top = Math.max(8, y - tip.offsetHeight - 14) + "px";
+  };
+  el.addEventListener("mousemove", show);
+  el.addEventListener("focus", () => show());
+  el.addEventListener("mouseleave", () => tip.classList.remove("show"));
+  el.addEventListener("blur", () => tip.classList.remove("show"));
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function legendHTML() {
+  return SEV_ORDER.map(s => `<span><i style="background:${SEV[s].color}"></i>${SEV[s].name}：${SEV[s].desc}</span>`).join("");
+}
+
+// ---------- parse rules.md ----------
+function parseRules(md) {
+  const cats = [], rules = [];
+  let cat = null, rule = null;
+  for (const raw of md.split(/\r?\n/)) {
+    const line = raw.trim();
+    let m;
+    if ((m = line.match(/^## [^、]+、(.+)$/))) { cat = { name: m[1], rules: [] }; cats.push(cat); continue; }
+    if ((m = line.match(/^### (\d+)\. (.+?)\s*(🔴|🟠|🟡)\s*$/))) {
+      rule = { n: +m[1], title: m[2], sev: m[3], cat: cat ? cat.name : "", bad: "", good: "", why: "" };
+      rules.push(rule); if (cat) cat.rules.push(rule); continue;
+    }
+    if (!rule) continue;
+    if ((m = line.match(/^- ❌\s*(.+)$/))) rule.bad = m[1];
+    else if ((m = line.match(/^- ✅\s*(.+)$/))) rule.good = m[1];
+    else if ((m = line.match(/^- \*\*為什麼\*\*：\s*(.+)$/))) rule.why = m[1];
+  }
+  return { cats, rules };
+}
+
+// ---------- stacked bars ----------
+function renderBars(target, rows, max) {
+  target.innerHTML = rows.map((row, i) => {
+    const segs = SEV_ORDER.filter(s => row.counts[s]).map(s =>
+      `<div class="seg" tabindex="0" data-row="${i}" data-sev="${s}" style="width:${row.counts[s] / max * 100}%;background:${SEV[s].color}">${row.counts[s]}</div>`).join("");
+    return `<div class="bar-row"><div class="bar-label">${esc(row.label)}</div><div class="bar-track">${segs}</div><div class="bar-total">${row.total}</div></div>`;
+  }).join("");
+  target.querySelectorAll(".seg").forEach(el => {
+    const row = rows[+el.dataset.row], s = el.dataset.sev;
+    const list = row.items ? row.items.filter(r => r.sev === s).map(r => (r.n ? r.n + ". " : "") + esc(r.title)).join("<br>") : "";
+    bindTip(el, `<b>${esc(row.label)}｜${s} ${SEV[s].name} ${row.counts[s]}${row.unit || "條"}</b>${list}`);
+    el.setAttribute("aria-label", `${row.label}，${SEV[s].name}${row.counts[s]}${row.unit || "條"}`);
+  });
+}
+
+function countBySev(items) {
+  const c = {}; SEV_ORDER.forEach(s => c[s] = items.filter(r => r.sev === s).length); return c;
+}
+
+// ---------- rule explorer ----------
+let activeFilter = "all", showAll = false, ALL = null;
+function renderFilters() {
+  const opts = [["all", "全部"], ...ALL.cats.map(c => ["cat:" + c.name, c.name]), ...SEV_ORDER.map(s => ["sev:" + s, s + " " + SEV[s].name])];
+  const box = document.getElementById("filters");
+  box.innerHTML = opts.map(([v, t]) => `<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${v === activeFilter}">${esc(t)}</button>`).join("");
+  box.querySelectorAll(".chip").forEach(b => b.onclick = () => { activeFilter = b.dataset.v; renderFilters(); renderRules(); });
+}
+function renderRules() {
+  let list = ALL.rules;
+  if (activeFilter.startsWith("cat:")) list = list.filter(r => r.cat === activeFilter.slice(4));
+  if (activeFilter.startsWith("sev:")) list = list.filter(r => r.sev === activeFilter.slice(4));
+  const limited = activeFilter === "all" && !showAll ? list.slice(0, 6) : list;
+  document.getElementById("ruleList").innerHTML = limited.map(r => `
+    <article class="rule glass">
+      <div class="rule-head"><h3><small>${r.n}</small>${esc(r.title)}</h3><span class="sev">${r.sev} ${SEV[r.sev].name}</span></div>
+      <p>❌ ${esc(r.bad)}</p>
+      <p>✅ ${esc(r.good)}</p>
+      <p class="why">${esc(r.why)}</p>
+    </article>`).join("");
+  const btn = document.getElementById("moreBtn");
+  btn.style.display = activeFilter === "all" && !showAll ? "" : "none";
+}
+document.getElementById("moreBtn").onclick = () => { showAll = true; renderRules(); };
+
+// ---------- example ----------
+const EX_ISSUES = [
+  { find: "Dear Mr. Thomas", sev: "🟠", fix: "Dear Mr. Weber", why: "Mr.後面要接姓，不是名字，對方會覺得你搞不清楚他的稱呼", rule: 24 },
+  { find: "Here is Wilson", sev: "🟡", fix: "This is Wilson", why: "中文「這裡是Wilson」直翻，自我介紹要說This is…", rule: 23 },
+  { find: "We have sent the samples last Friday", sev: "🔴", fix: "We sent the samples last Friday", why: "有last Friday這種明確過去時間，不能用現在完成式", rule: 20 },
+  { find: "Please be noted that the tracking number is as below", sev: "🔴", fix: "Please note that the tracking number is below", why: "be noted的主詞該是事，不是人；as below是亞洲貿易信的老習慣", rule: 26 },
+  { find: "Our price is cheap", sev: "🟠", fix: "Our prices are competitive", why: "cheap常帶「廉價、品質差」的意思，報價要用competitive", rule: 8 },
+  { find: "there are many customers like", sev: "🔴", fix: "many customers like", why: "There are…後面要接who／that才能再接動詞", rule: 16 },
+  { find: "03/04", sev: "🟠", fix: "March 4", why: "德國習慣日在前，會被讀成4月3日", rule: 29 },
+  { find: "$12", sev: "🟠", fix: "USD 12", why: "很多國家的貨幣都用$，德國客戶平常用歐元，報價一定要寫幣別", rule: 30 },
+  { find: "Please kindly", sev: "🟡", fix: "Could you please", why: "please和kindly疊用像過度客氣，讀起來僵硬", rule: 1 },
+  { find: "revert to me", sev: "🟠", fix: "get back to me", why: "revert當「回覆」是南亞用法，歐美讀者會理解成「恢復原狀」", rule: 27 },
+  { find: "ASAP", sev: "🟠", fix: "by Friday, February 27", why: "沒說期限又帶催促感，給具體時間比較容易配合", rule: 4 },
+  { find: "Welcome to contact us", sev: "🟡", fix: "Feel free to contact us", why: "中文「歡迎聯絡」直翻，Welcome to後面該接地方", rule: 12 },
+  { find: "Look forward to hear from you", sev: "🔴", fix: "I look forward to hearing from you", why: "look forward to的to是介系詞，後面要接-ing", rule: 21 },
+];
+const EX_TEXT = [
+  "Dear Mr. Thomas,",
+  "Here is Wilson from ABC Company. We have sent the samples last Friday. Please be noted that the tracking number is as below.",
+  "Our price is cheap and there are many customers like this model.",
+  "The goods will ship on 03/04 and the price is $12 per unit. Please kindly confirm the order and revert to me ASAP.",
+  "Thank you for choosing us. Welcome to contact us if you have any questions.",
+  "Look forward to hear from you.",
+].join(String.fromCharCode(10));
+function renderExample() {
+  let html = esc(EX_TEXT);
+  EX_ISSUES.forEach((it, i) => {
+    html = html.replace(esc(it.find), `<mark tabindex="0" data-i="${i}" style="border-color:${SEV[it.sev].color}">${esc(it.find)}<sup>${i + 1}</sup></mark>`);
+  });
+  const box = document.getElementById("mailBefore");
+  box.innerHTML = html.replace(/\n/g, "<br>");
+  box.querySelectorAll("mark").forEach(m => {
+    const it = EX_ISSUES[+m.dataset.i];
+    bindTip(m, `<b>${it.sev} ${SEV[it.sev].name}（規則${it.rule}）</b>→ ${esc(it.fix)}<br><span style="color:var(--muted)">${esc(it.why)}</span>`);
+  });
+  document.getElementById("legend2").innerHTML = legendHTML();
+  const counts = countBySev(EX_ISSUES);
+  renderBars(document.getElementById("diagBar"), [{ label: "這封信", counts, total: EX_ISSUES.length, unit: "個", items: EX_ISSUES.map(it => ({ title: it.find, sev: it.sev })) }], EX_ISSUES.length);
+  document.getElementById("issues").innerHTML = EX_ISSUES.map((it, i) => `
+    <div class="issue"><span class="n">${i + 1}</span><div><span class="sev">${it.sev} ${SEV[it.sev].name}</span>
+    <s>${esc(it.find)}</s> → <b>${esc(it.fix)}</b><div class="muted">${esc(it.why)}（規則${it.rule}）</div></div></div>`).join("");
+}
+
+// ---------- scenarios ----------
+function parseScenario(md) {
+  const rules = []; let use = "";
+  for (const raw of md.split(NL)) {
+    const line = raw.trim(); let m;
+    if ((m = line.match(/^適用：(.+)$/))) use = m[1];
+    if ((m = line.match(/^### ([A-Z])(\d+)\. (.+?)\s*(🔴|🟠|🟡)\s*$/))) rules.push({ n: m[1] + m[2], title: m[3], sev: m[4] });
+  }
+  return { use, rules };
+}
+function renderScenarios() {
+  const loaded = SCENARIOS.filter(sc => SCEN_MD[sc.key]).map(sc => ({ ...sc, ...parseScenario(SCEN_MD[sc.key]) }));
+  if (!loaded.length) return;
+  document.getElementById("legend3").innerHTML = legendHTML();
+  const rows = loaded.map(sc => ({ label: sc.name, counts: countBySev(sc.rules), total: sc.rules.length, items: sc.rules }));
+  renderBars(document.getElementById("scenBars"), rows, Math.max(...rows.map(r => r.total)));
+  document.getElementById("scenCards").innerHTML = loaded.map(sc => `
+    <article class="scen glass">
+      <div class="scen-top"><h3>${esc(sc.name)}</h3><span class="code">${sc.code}・${sc.rules.length}條</span></div>
+      <div class="use">${esc(sc.use)}</div>
+      <ul>${sc.rules.slice(0, 3).map(r => `<li>${esc(r.title)}</li>`).join("")}</ul>
+    </article>`).join("");
+  const total = loaded.reduce((a, sc) => a + sc.rules.length, 0);
+  const statEl = document.querySelector('[data-stat="scen"]');
+  if (statEl) statEl.textContent = loaded.length;
+  document.querySelector("#scenarios .chart-sub").textContent = `${loaded.length}個情境、共${total}條專屬規則；滑過色塊看是哪幾條`;
+}
+
+// ---------- copy prompt ----------
+function buildPrompt(text, country, scen) {
+  const skillBody = SKILL_MD.replace(/^---[\s\S]*?---\s*/, "");
+  const wrap = sc => `<scenario name="${sc.name}" code="${sc.code}">${NL}${SCEN_MD[sc.key].trim()}${NL}</scenario>`;
+  let scenBlock = "", scenLine = "情境：通用";
+  if (scen === "auto") {
+    scenBlock = SCENARIOS.filter(sc => SCEN_MD[sc.key]).map(wrap).join(NL + NL);
+    scenLine = "情境：請依<skill>的說明自己判斷，只套用符合的情境規則";
+  } else if (scen !== "none" && SCEN_MD[scen]) {
+    const sc = SCENARIOS.find(x => x.key === scen);
+    scenBlock = wrap(sc);
+    scenLine = `情境：${sc.name}`;
+  }
+  return `請完全依照下面<skill>的指示，搭配<rules>裡的通用規則${scenBlock ? "和<scenario>裡的情境規則" : ""}，檢查我的英文。
+
+<skill>
+${skillBody.trim()}
+</skill>
+
+<rules>
+${RULES_MD.trim()}
+</rules>
+${scenBlock ? NL + scenBlock + NL : ""}
+${scenLine}
+收件人：${country || "未指定"}
+請檢查以下英文：
+"""
+${text.trim()}
+"""`;
+}
+document.getElementById("copyBtn").onclick = async () => {
+  const status = document.getElementById("copyStatus");
+  const text = document.getElementById("userText").value;
+  if (!text.trim()) { status.textContent = "請先貼上要檢查的英文。"; return; }
+  if (!RULES_MD || !SKILL_MD) { status.textContent = "規則還沒載入完成，請稍等一下再按。"; return; }
+  const prompt = buildPrompt(text, document.getElementById("country").value, document.getElementById("scenario").value);
+  try {
+    await navigator.clipboard.writeText(prompt);
+  } catch {
+    const ta = document.createElement("textarea"); ta.value = prompt; document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); ta.remove();
+  }
+  status.textContent = "已複製！打開下面任一個AI，貼上送出就好。";
+};
+
+
+// ---------- constellation background (same feel as wilsonaienglish.com) ----------
+(() => {
+  const c = document.getElementById("net");
+  if (!c || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const ctx = c.getContext("2d");
+  let W, H, pts;
+  const init = () => {
+    W = c.width = innerWidth; H = c.height = innerHeight;
+    const n = Math.round(Math.min(70, W * H / 22000));
+    pts = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25 }));
+  };
+  const tick = () => {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+    }
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+      const a = pts[i], b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < 150) { ctx.strokeStyle = `rgba(255,255,255,${.07 * (1 - d / 150)})`; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+    }
+    ctx.fillStyle = "rgba(118,185,0,.75)";
+    for (const p of pts) { ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, 7); ctx.fill(); }
+    requestAnimationFrame(tick);
+  };
+  addEventListener("resize", init); init(); tick();
+})();
+
+// ---------- boot ----------
+document.getElementById("legend").innerHTML = legendHTML();
+renderExample();
+Promise.all(SCENARIOS.map(sc => fetch(`references/scenarios/${sc.key}.md`).then(r => r.ok ? r.text() : "").then(t => { if (t) SCEN_MD[sc.key] = t; }).catch(() => {})))
+  .then(renderScenarios);
+Promise.all([fetch("references/rules.md").then(r => r.text()), fetch("SKILL.md").then(r => r.text())])
+  .then(([rules, skill]) => {
+    RULES_MD = rules; SKILL_MD = skill;
+    ALL = parseRules(rules);
+    const rows = ALL.cats.map(c => ({ label: c.name, counts: countBySev(c.rules), total: c.rules.length, items: c.rules }));
+    const max = Math.max(...rows.map(r => r.total));
+    renderBars(document.getElementById("bars"), rows, max);
+    const tot = countBySev(ALL.rules);
+    const nonError = tot["🟠"] + tot["🟡"];
+    document.querySelector('[data-stat="total"]').textContent = ALL.rules.length;
+    document.querySelector('[data-stat="cats"]').textContent = ALL.cats.length;
+    document.querySelector('[data-stat="nonError"]').textContent = nonError;
+    const top2 = [...rows].sort((a, b) => b.counts["🟠"] - a.counts["🟠"]).slice(0, 2).map(r => `「${esc(r.label)}」`).join("和");
+    document.getElementById("insight").innerHTML =
+      `<b>${ALL.rules.length}條裡有${nonError}條不是文法錯</b>，而是語氣、誤會或不自然的問題，光看文法看不出來。🟠誤會類集中在${top2}——寫給客戶的信，最該先檢查這兩類。`;
+    document.getElementById("table").innerHTML =
+      `<thead><tr><th>類別</th>${SEV_ORDER.map(s => `<th class="num">${s} ${SEV[s].name}</th>`).join("")}<th class="num">合計</th></tr></thead><tbody>` +
+      rows.map(r => `<tr><td>${esc(r.label)}</td>${SEV_ORDER.map(s => `<td class="num">${r.counts[s]}</td>`).join("")}<td class="num">${r.total}</td></tr>`).join("") +
+      `<tr><td><b>全部</b></td>${SEV_ORDER.map(s => `<td class="num"><b>${tot[s]}</b></td>`).join("")}<td class="num"><b>${ALL.rules.length}</b></td></tr></tbody>`;
+    renderFilters(); renderRules();
+  })
+  .catch(() => {
+    document.getElementById("bars").innerHTML = '<p class="muted">規則載入失敗。請直接看 <a href="references/rules.md">references/rules.md</a>。</p>';
+  });
+</script>
+</body>
+</html>
