@@ -1,0 +1,25 @@
+name: 回報規則有誤
+description: 某條規則的例句、原因或等級不對
+title: "[規則有誤] "
+labels: ["規則有誤"]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: 哪一條規則？
+      description: 例如「規則21」或「求職J8」
+      placeholder: 規則21
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 哪裡不對？
+      description: 例句錯了、原因說明不精確、等級標錯，或其實不算台式英文
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: 參考依據（選填）
+      description: 字典、文法書、英文母語者的說法，或你的實際經驗

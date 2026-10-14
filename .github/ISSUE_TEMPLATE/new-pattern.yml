@@ -1,0 +1,44 @@
+name: 分享一個台式英文
+description: 你遇過、寫過或看過的台式英文，好的例子會加進規則
+title: "[新句子] "
+labels: ["新句子"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        謝謝分享！我們想收的是「英文不錯的人也常寫、自己以為是對的」句子，不是初學者的錯誤。
+        被採用的例子，會在README致謝你的GitHub帳號。
+  - type: textarea
+    id: wrong
+    attributes:
+      label: 台式寫法
+      description: 你看到或寫過的英文原句
+      placeholder: Please be noted that the meeting is moved to Friday.
+    validations:
+      required: true
+  - type: textarea
+    id: right
+    attributes:
+      label: 你覺得自然的寫法（不確定可以空著）
+      placeholder: Please note that the meeting has been moved to Friday.
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: 在哪種情境遇到？
+      options:
+        - 寫給客戶的商務Email
+        - 求職（履歷、求職信、面試）
+        - 外商職場（同事、主管、Teams）
+        - 簡報與會議發言
+        - 跨境電商與客服
+        - 學術與升學
+        - 社群與個人品牌
+        - 旅遊與生活
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 補充說明
+      description: 外國人讀到時的反應、你後來怎麼發現的，都很有幫助。請不要貼出真實的人名、公司或聯絡資料。

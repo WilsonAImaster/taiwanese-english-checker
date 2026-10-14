@@ -117,6 +117,17 @@ git clone https://github.com/WilsonAImaster/taiwanese-english-checker ~/.claude/
 - **每次只看「最值得記住的一點」**：一次改掉一個習慣，比一次記30條有效。
 - AI也會出錯。重要的信，改完自己再讀一遍。
 
+## 一起讓規則更好
+
+這份規則會持續更新，歡迎一起補：
+
+- **遇過其他台式英文？** → [分享一個台式英文](https://github.com/WilsonAImaster/taiwanese-english-checker/issues/new?template=new-pattern.yml)
+- **覺得某條規則不對？** → [回報規則有誤](https://github.com/WilsonAImaster/taiwanese-english-checker/issues/new?template=rule-error.yml)
+
+被採用的例子，會在這裡致謝你的GitHub帳號。
+
+想在新增情境包或規則時收到通知？加入[Skool免費社群](https://www.skool.com/wilson-9076)，每次更新都會在那裡公告。
+
 ## 關於作者
 
 Wilson，英文老師，教學16年，研究怎麼用AI讓英文真的派上用場。
