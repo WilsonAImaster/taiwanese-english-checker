@@ -46,7 +46,7 @@ git clone https://github.com/WilsonAImaster/taiwanese-english-checker ~/.claude/
 
 ## About
 
-Built by Wilson, an English teacher of 16 years who explores how AI can make English actually useful at work. Found a wrong rule or a pattern we missed? [Open an issue](https://github.com/WilsonAImaster/taiwanese-english-checker/issues).
+Built by Wilson, an English teacher with 17 years of teaching experience who explores how AI can make English actually useful at work. Found a wrong rule or a pattern we missed? [Open an issue](https://github.com/WilsonAImaster/taiwanese-english-checker/issues).
 
 More AI tool tests: [Website](https://wilsonaienglish.com/) · [YouTube](https://www.youtube.com/@WilsonAILab) · [Skool](https://www.skool.com/wilson-9076) · [Instagram](https://www.instagram.com/wilsonailab/) · [Threads](https://www.threads.com/@wilsonailab)
 
