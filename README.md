@@ -134,7 +134,7 @@ git clone https://github.com/WilsonAImaster/taiwanese-english-checker ~/.claude/
 
 ## 關於作者
 
-Wilson，英文老師，17年英文教學經驗，研究怎麼用AI讓英文真的派上用場。
+Wilson，研究AI應用，有17年英語教學經驗，也涉足國際貿易。
 
 這些規則挑的是英文不錯的人也常寫、最容易造成誤會的句子。發現規則有誤，或遇過其他台式英文，歡迎[開issue](https://github.com/WilsonAImaster/taiwanese-english-checker/issues)告訴我。
 
