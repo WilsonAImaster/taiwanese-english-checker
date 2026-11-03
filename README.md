@@ -65,6 +65,8 @@ I look forward to hearing from you.
 
 完整輸出（13個問題＋文化提醒）見[examples/client-email.md](examples/client-email.md)。
 
+更多範例：[英文求職信](examples/cover-letter.md)・[LinkedIn貼文](examples/linkedin-post.md)・[簡報講稿](examples/presentation.md)
+
 ## 30條地雷，分四類
 
 | 類別 | 例子 |

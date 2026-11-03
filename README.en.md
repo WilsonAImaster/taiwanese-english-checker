@@ -20,7 +20,7 @@ Generic AI rewriting fixes your text but doesn't tell you **why**, so you repeat
 
 ## Example
 
-See [examples/client-email.md](examples/client-email.md) (explanations in Traditional Chinese).
+See [examples/client-email.md](examples/client-email.md) (explanations in Traditional Chinese). More: [cover letter](examples/cover-letter.md) · [LinkedIn post](examples/linkedin-post.md) · [presentation script](examples/presentation.md).
 
 The skill explains in the user's language: ask in English and you get English explanations.
 
