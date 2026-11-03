@@ -5,6 +5,8 @@
 > 貼上你的英文Email，AI幫你抓出台式英文：外國人讀起來哪裡怪、為什麼，再給你自然的改法。
 > 一個給AI用的skill（`SKILL.md`）。專抓**英文不錯的人也常寫、自己以為是對的**30條台式英文。
 
+![台式英文抓蟲器實際診斷：一封寫給德國客戶的信，標出13個問題](assets/preview.png)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 **👉 介紹頁＋免費線上試用：https://wilsonaimaster.github.io/taiwanese-english-checker/**

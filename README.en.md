@@ -5,6 +5,8 @@
 > Paste your English email, and AI points out the "Taiwanese English" (Chinglish) in it — what sounds off to native readers, why, and a natural rewrite.
 > An AI agent skill (`SKILL.md`) that targets 30 patterns even good English writers use without realizing they are "Taiwanese English".
 
+![Taiwanese English Checker diagnosing a client email: 13 issues found](assets/preview.png)
+
 **👉 Landing page & free online try-out: https://wilsonaimaster.github.io/taiwanese-english-checker/**
 
 ## Why
